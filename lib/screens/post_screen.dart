@@ -10,43 +10,20 @@ class PostScreen extends StatefulWidget {
 }
 
 class _PostScreenState extends State<PostScreen> {
-
-
   Widget build(BuildContext context) {
-     return ScopedModel<PostModel>(
-      model: PostModel(),
-      child: _PostList()
-    );
-  }
-}
-
-class _InheritedPost extends InheritedWidget {
-  final Widget child;
-  final List<Post> posts;
-  final Function createPost;
-
-  _InheritedPost(
-      {@required this.child, @required this.posts, @required this.createPost})
-      : super(child: child);
-
-  @override
-  bool updateShouldNotify(InheritedWidget oldWidget) => true;
-
-  static _InheritedPost of(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<_InheritedPost>();
+    return ScopedModel<PostModel>(model: PostModel(), child: _PostList());
   }
 }
 
 class _PostList extends StatelessWidget {
-
   Widget build(BuildContext context) {
-return ScopedModelDescendant<PostModel>(
+    return ScopedModelDescendant<PostModel>(
       builder: (context, _, model) {
         final posts = model.posts;
         return Scaffold(
           body: ListView.builder(
-          itemCount: posts.length * 2,
-          itemBuilder: (BuildContext context, int i) {
+            itemCount: posts.length * 2,
+            itemBuilder: (BuildContext context, int i) {
               if (i.isOdd) {
                 return Divider();
               }
@@ -54,9 +31,8 @@ return ScopedModelDescendant<PostModel>(
               final index = i ~/ 2;
 
               return ListTile(
-                title: Text(posts[index].title),
-                subtitle: Text(posts[index].body)
-              );
+                  title: Text(posts[index].title),
+                  subtitle: Text(posts[index].body));
             },
           ),
           bottomNavigationBar: BottomNavigation(),
@@ -70,9 +46,27 @@ return ScopedModelDescendant<PostModel>(
 
 class _PostButton extends StatelessWidget {
   Widget build(BuildContext context) {
+    final postModel = ScopedModel.of<PostModel>(context, rebuildOnChange: true);
     return FloatingActionButton(
-        onPressed: () => { },
+        onPressed: postModel.addPost,
         tooltip: 'Añadir Post',
         child: Icon(Icons.add));
+  }
+}
+
+class _InheritedPost extends InheritedWidget {
+  final Widget child;
+  final List<Post> posts;
+  final Function createPost;
+
+  _InheritedPost({@required this.child,
+                  @required this.posts,
+                  @required this.createPost}) : super(child: child);
+
+  @override
+  bool updateShouldNotify(InheritedWidget oldWidget) => true;
+
+  static _InheritedPost of(BuildContext context) {
+    return (context.inheritFromWidgetOfExactType(_InheritedPost) as _InheritedPost);
   }
 }

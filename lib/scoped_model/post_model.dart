@@ -4,7 +4,7 @@ import 'package:meetups_app/services/post_api_provider.dart';
 import 'package:scoped_model/scoped_model.dart';
 
 class PostModel extends Model {
-  List<Post> posts;
+ List<Post> posts = [];
   final testingState = 'Testing State';
 
 final PostApiProvider _api = PostApiProvider();
