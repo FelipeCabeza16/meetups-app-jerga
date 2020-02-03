@@ -33,38 +33,59 @@ class _PostScreenState extends State<PostScreen> {
   }
 
   Widget build(BuildContext context) {
+    return _InheritedPost(
+        posts: _posts, createPost: _addPost, child: _PostList());
+  }
+}
+
+class _InheritedPost extends InheritedWidget {
+  final Widget child;
+  final List<Post> posts;
+  final Function createPost;
+
+  _InheritedPost(
+      {@required this.child, @required this.posts, @required this.createPost})
+      : super(child: child);
+
+  @override
+  bool updateShouldNotify(InheritedWidget oldWidget) => true;
+
+  static _InheritedPost of(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<_InheritedPost>();
+  }
+}
+
+class _PostList extends StatelessWidget {
+
+  Widget build(BuildContext context) {
+    final posts = _InheritedPost.of(context).posts;
     return Scaffold(
-      body: _PostList(posts: _posts),
-      bottomNavigationBar: BottomNavigation(),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _addPost,
-        tooltip: 'Add Post',
-        child: Icon(Icons.add),
+      body: ListView.builder(
+        itemCount: posts.length * 2,
+        itemBuilder: (BuildContext context, int i) {
+          if (i.isOdd) {
+            return Divider();
+          }
+
+          final index = i ~/ 2;
+
+          return ListTile(
+              title: Text(posts[index].title),
+              subtitle: Text(posts[index].body));
+        },
       ),
+      bottomNavigationBar: BottomNavigation(),
+      floatingActionButton: _PostButton(),
       appBar: AppBar(title: Text('Posts')),
     );
   }
 }
 
-class _PostList extends StatelessWidget {
-  final List<Post> _posts;
-
-  _PostList({@required List<Post> posts}) : _posts = posts;
-
+class _PostButton extends StatelessWidget {
   Widget build(BuildContext context) {
-    return ListView.builder(
-      itemCount: _posts.length * 2,
-      itemBuilder: (BuildContext context, int i) {
-        if (i.isOdd) {
-          return Divider();
-        }
-
-        final index = i ~/ 2;
-
-        return ListTile(
-            title: Text(_posts[index].title),
-            subtitle: Text(_posts[index].body));
-      },
-    );
+    return FloatingActionButton(
+        onPressed: _InheritedPost.of(context).createPost,
+        tooltip: 'Añadir Post',
+        child: Icon(Icons.add));
   }
 }
