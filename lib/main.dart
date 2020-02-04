@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:meetups_app/screens/meetup_detail_screen.dart';
-import 'package:meetups_app/screens/post_screen.dart';
+import 'package:meetups_app/screens/meetup_home_screen.dart';
 
 void main() => runApp(MeetuperApp());
 
@@ -11,12 +11,20 @@ class MeetuperApp extends StatelessWidget {
   Widget build(BuildContext context) {
     // TODO: implement build
     return MaterialApp(
-        home: PostScreen(),
+        home: MeetupHomeScreen(), 
         debugShowCheckedModeBanner: false,
         theme: ThemeData(primarySwatch: Colors.blue),
-      routes: {
-      MeetupDetailScreen.route: (context) => MeetupDetailScreen()
-      },
+       // routes: {
+      //   MeetupDetailScreen.route: (context) => MeetupDetailScreen()
+      // },
+      onGenerateRoute: (RouteSettings settings) {
+        if (settings.name == MeetupDetailScreen.route) {
+          final MeetupDetailArguments arguments = settings.arguments;
+          return MaterialPageRoute(
+          builder: (context) => MeetupDetailScreen(meetupId: arguments.id)
+          );
+        }
+      }
       );
   }
 }
