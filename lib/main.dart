@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:meetups_app/models/arguments.dart';
+import 'package:meetups_app/screens/counter_home_screen.dart';
 import 'package:meetups_app/screens/login_screen.dart';
 import 'package:meetups_app/screens/meetup_detail_screen.dart';
 import 'package:meetups_app/screens/meetup_home_screen.dart';
@@ -16,7 +17,8 @@ class MeetuperApp extends StatelessWidget {
     return MaterialApp(
         debugShowCheckedModeBanner: false,
         theme: ThemeData(primarySwatch: Colors.blue),
-        home: LoginScreen(),
+        home: CounterHomeScreen(title: appTitle),
+        // home: LoginScreen(),
         routes: {
           MeetupHomeScreen.route: (context) => MeetupHomeScreen(),
           RegisterScreen.route: (context) => RegisterScreen(),
@@ -28,13 +30,12 @@ class MeetuperApp extends StatelessWidget {
                 builder: (context) =>
                     MeetupDetailScreen(meetupId: arguments.id));
           }
-            if (settings.name == LoginScreen.route) {
-          final LoginScreenArguments arguments = settings.arguments;
+          if (settings.name == LoginScreen.route) {
+            final LoginScreenArguments arguments = settings.arguments;
 
-          return MaterialPageRoute(
-            builder: (context) => LoginScreen(message: arguments?.message)
-          );
-        }
+            return MaterialPageRoute(
+                builder: (context) => LoginScreen(message: arguments?.message));
+          }
         });
   }
 }
