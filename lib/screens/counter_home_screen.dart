@@ -1,30 +1,30 @@
 import 'package:flutter/material.dart';
+import 'package:meetups_app/blocs/bloc_provider.dart';
 import 'package:meetups_app/blocs/counter_bloc.dart';
 import 'package:meetups_app/widgets/bottom_navigation.dart';
 
 class CounterHomeScreen extends StatefulWidget {
   final String _title;
 
-  final CounterBloc bloc;
-
-  CounterHomeScreen({String title, this.bloc}) : _title = title;
+  CounterHomeScreen({String title}) : _title = title;
 
   @override
   _CounterHomeScreenState createState() => _CounterHomeScreenState();
 }
 
 class _CounterHomeScreenState extends State<CounterHomeScreen> {
-  // CounterBloc counterBloc;
+  CounterBloc counterBloc;
 
   didChangeDependencies() {
     super.didChangeDependencies();
-    // counterBloc = CounterBlocProvider.of(context);
+    counterBloc = BlocProvider.of<CounterBloc>(context);
   }
 
   int _counter = 0;
 
   _increment() {
-    widget.bloc.increment(20);
+    counterBloc.increment(15);
+    // widget.bloc.increment(20);
   }
 
   Widget build(BuildContext context) {
@@ -37,7 +37,7 @@ class _CounterHomeScreenState extends State<CounterHomeScreen> {
               textDirection: TextDirection.ltr,
               style: TextStyle(fontSize: 15.0)),
           StreamBuilder(
-            stream: widget.bloc.counterStream,
+            stream: counterBloc.counterStream,
             builder: (BuildContext context, AsyncSnapshot<int> snapshot) {
               if (snapshot.hasData) {
                 return Text('Countador: ${snapshot.data}',
@@ -52,7 +52,7 @@ class _CounterHomeScreenState extends State<CounterHomeScreen> {
           ),
           RaisedButton(
             child: StreamBuilder(
-              stream: widget.bloc.counterStream,
+              stream: counterBloc.counterStream,
               initialData: _counter,
               builder: (BuildContext context, AsyncSnapshot<int> snapshot) {
                 if (snapshot.hasData) {

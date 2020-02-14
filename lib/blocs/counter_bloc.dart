@@ -1,7 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:meetups_app/blocs/bloc_provider.dart';
 
-class CounterBloc {
+class CounterBloc extends BlocBase{
   final StreamController<int> _streamController =
       StreamController<int>.broadcast();
   final StreamController<int> _counterController =
