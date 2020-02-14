@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:meetups_app/models/meetups.dart';
 import 'package:meetups_app/screens/meetup_detail_screen.dart';
+import 'package:meetups_app/services/auth_api_provider.dart';
 import 'package:meetups_app/services/meetup_api_provider.dart';
 
 import 'package:meetups_app/utils/hypotenuse.dart';
@@ -12,6 +13,7 @@ class MeetupDetailArguments {
 }
 
 class MeetupHomeScreen extends StatefulWidget {
+  static final String route = '/meetups';
   final MeetupApiService _api = MeetupApiService();
   MeetupHomeScreenState createState() => MeetupHomeScreenState();
 }
@@ -33,7 +35,7 @@ class MeetupHomeScreenState extends State<MeetupHomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Column(
-        children: [_MeetupList(meetups: meetups)],
+        children: [_MeetupTitle(), _MeetupList(meetups: meetups)],
       ),
       appBar: AppBar(title: Text('Inicio')),
       floatingActionButton:
@@ -43,17 +45,59 @@ class MeetupHomeScreenState extends State<MeetupHomeScreen> {
 }
 
 class _MeetupTitle extends StatelessWidget {
+  final AuthApiService auth = AuthApiService();
+
+  Widget _buildUserWelcome(BuildContext context) {
+    return FutureBuilder<bool>(
+      future: auth.isAuthenticated(),
+      builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
+        if (snapshot.hasData && snapshot.data) {
+          final user = auth.authUser;
+          return Container(
+              margin: EdgeInsets.only(
+                  top: MediaQuery.of(context).size.height * 0.01),
+              child: Row(
+                children: <Widget>[
+                  user.avatar != null
+                      ? CircleAvatar(
+                          backgroundImage: NetworkImage(user.avatar),
+                        )
+                      : Container(width: 0, height: 0),
+                  Text('Bienvenido ${user.username}'),
+                  Spacer(),
+                  GestureDetector(
+                    onTap: () {
+                      auth.logout().then((isLogout) =>
+                          Navigator.pushNamedAndRemoveUntil(context, '/login',
+                              (Route<dynamic> route) => false));
+                    },
+                    child: Text('Salir',
+                        style:
+                            TextStyle(color: Theme.of(context).primaryColor)),
+                  )
+                ],
+              ));
+        } else {
+          return Container(width: 0, height: 0);
+        }
+      },
+    );
+  }
+
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height;
     final width = MediaQuery.of(context).size.width;
     final curScaleFactor = MediaQuery.of(context).textScaleFactor;
     return Container(
-      alignment: Alignment.centerLeft,
-      padding: EdgeInsets.all(hypotenuse(height * 0.02, width * 0.02)),
-      child: Text('Meetups Relacionados',
-          style: TextStyle(
-              fontSize: 22.0 * curScaleFactor, fontWeight: FontWeight.bold)),
-    );
+        alignment: Alignment.centerLeft,
+        padding: EdgeInsets.all(hypotenuse(height * 0.02, width * 0.02)),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text('Meetups Relacionados',
+              style: TextStyle(
+                  fontSize: 22.0 * curScaleFactor,
+                  fontWeight: FontWeight.bold)),
+          _buildUserWelcome(context)
+        ]));
   }
 }
 
@@ -68,7 +112,12 @@ class _MeetupCard extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         ListTile(
-          leading: CircleAvatar(backgroundImage: NetworkImage(meetup.image, ), radius: 25.0,),
+          leading: CircleAvatar(
+            backgroundImage: NetworkImage(
+              meetup.image,
+            ),
+            radius: 25.0,
+          ),
           title: Text(meetup.title),
           subtitle: Text(meetup.description),
         ),
