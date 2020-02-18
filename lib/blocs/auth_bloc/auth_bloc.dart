@@ -1,11 +1,15 @@
 import 'dart:async';
-
 import 'package:flutter/widgets.dart';
 import 'package:meetups_app/blocs/auth_bloc/events.dart';
 import 'package:meetups_app/blocs/auth_bloc/states.dart';
 import 'package:meetups_app/blocs/bloc_provider.dart';
 import 'package:meetups_app/services/auth_api_provider.dart';
 import 'package:rxdart/rxdart.dart';
+
+
+export 'package:meetups_app/blocs/auth_bloc/events.dart';
+export 'package:meetups_app/blocs/auth_bloc/states.dart';
+
 
 class AuthBloc extends BlocBase {
   final AuthApiService auth;

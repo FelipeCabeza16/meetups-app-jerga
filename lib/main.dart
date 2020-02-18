@@ -4,6 +4,7 @@ import 'package:meetups_app/blocs/auth_bloc/events.dart';
 import 'package:meetups_app/blocs/auth_bloc/states.dart';
 import 'package:meetups_app/blocs/bloc_provider.dart';
 import 'package:meetups_app/blocs/meetups_bloc.dart';
+import 'package:meetups_app/blocs/user_bloc/user_bloc.dart';
 import 'package:meetups_app/models/arguments.dart';
 import 'package:meetups_app/screens/login_screen.dart';
 import 'package:meetups_app/screens/meetup_detail_screen.dart';
@@ -89,7 +90,12 @@ class _MeetuperAppState extends State<MeetuperApp> {
             return MaterialPageRoute(
                 builder: (context) => BlocProvider<MeetupBloc>(
                     bloc: MeetupBloc(),
-                    child: MeetupDetailScreen(meetupId: arguments.id)));
+                    child: BlocProvider<UserBloc>(
+                      bloc: UserBloc(auth: AuthApiService()),
+                      child: MeetupDetailScreen(meetupId: arguments.id)
+                    )
+                  )
+                );
           }
           if (settings.name == LoginScreen.route) {
             final LoginScreenArguments arguments = settings.arguments;
