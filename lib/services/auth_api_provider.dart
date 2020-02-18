@@ -74,7 +74,7 @@ class AuthApiService {
   }
 
   Future<bool> logout() async {
-print('logout');
+  print('callong logout');
     try {
       await _removeAuthData();
       return true;

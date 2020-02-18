@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:meetups_app/blocs/bloc_provider.dart';
+import 'package:meetups_app/blocs/meetups_bloc.dart';
 import 'package:meetups_app/models/meetups.dart';
+import 'package:meetups_app/services/auth_api_provider.dart';
 import 'package:meetups_app/services/meetup_api_provider.dart';
 import 'package:meetups_app/utils/hypotenuse.dart';
+import 'package:meetups_app/widgets/bottom_navigation.dart';
 
 class MeetupDetailScreen extends StatefulWidget {
   static final String route = '/meetupDetail';
@@ -15,42 +19,101 @@ class MeetupDetailScreen extends StatefulWidget {
 }
 
 class _MeetupDetailScreenState extends State<MeetupDetailScreen> {
-  Meetup meetup;
-  initState() {
-    super.initState();
-    _fetchMeetup();
-  }
-
-  _fetchMeetup() async {
-    final meetup = await widget.api.fetchMeetupById(widget.meetupId);
-    setState(() => this.meetup = meetup);
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    BlocProvider.of<MeetupBloc>(context).fetchMeetup(widget.meetupId);
   }
 
   Widget build(BuildContext context) {
     return Scaffold(
-      body: meetup != null
-          ? ListView(
+      // body: meetup != null
+      //     ? ListView(
+      //         children: <Widget>[
+      //           HeaderSection(meetup),
+      //           TitleSection(meetup),
+      //           AdditionalInfoSection(meetup),
+      //           Padding(
+      //               padding: EdgeInsets.all(hypotenuse(
+      //       MediaQuery.of(context).size.height * 0.04,
+      //       MediaQuery.of(context).size.width * 0.04)),
+      //               child: Align(
+      //                   alignment: Alignment.centerLeft,
+      //                   child: Text(
+      //                       'Lake Oeschinen lies at the foot of the Blüemlisalp in the Bernese '
+      //                       'Alps. Situated 1,578 meters above sea level, it is one of the '
+      //                       'larger Alpine Lakes. A gondola ride from Kandersteg, followed by a '
+      //                       'half-hour walk through pastures and pine forest, leads you to the '
+      //                       'lake, which warms to 20 degrees Celsius in the summer. Activities '
+      //                       'enjoyed here include rowing, and riding the summer toboggan run.'
+
+      body: StreamBuilder<Meetup>(
+        stream: BlocProvider.of<MeetupBloc>(context).meetup,
+        builder: (BuildContext context, AsyncSnapshot<Meetup> snapshot) {
+          if (snapshot.hasData) {
+            final meetup = snapshot.data;
+            return ListView(
               children: <Widget>[
                 HeaderSection(meetup),
                 TitleSection(meetup),
                 AdditionalInfoSection(meetup),
                 Padding(
-                    padding: EdgeInsets.all(hypotenuse(
-            MediaQuery.of(context).size.height * 0.04,
-            MediaQuery.of(context).size.width * 0.04)),
-                    child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                            'Lake Oeschinen lies at the foot of the Blüemlisalp in the Bernese '
-                            'Alps. Situated 1,578 meters above sea level, it is one of the '
-                            'larger Alpine Lakes. A gondola ride from Kandersteg, followed by a '
-                            'half-hour walk through pastures and pine forest, leads you to the '
-                            'lake, which warms to 20 degrees Celsius in the summer. Activities '
-                            'enjoyed here include rowing, and riding the summer toboggan run.')))
+                  padding: EdgeInsets.all(hypotenuse(
+                      MediaQuery.of(context).size.height * 0.04,
+                      MediaQuery.of(context).size.width * 0.04)),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                        'Lake Oeschinen lies at the foot of the Blüemlisalp in the Bernese '
+                        'Alps. Situated 1,578 meters above sea level, it is one of the '
+                        'larger Alpine Lakes. A gondola ride from Kandersteg, followed by a '
+                        'half-hour walk through pastures and pine forest, leads you to the '
+                        'lake, which warms to 20 degrees Celsius in the summer. Activities '
+                        'enjoyed here include rowing, and riding the summer toboggan run.'),
+                  ),
+                ),
               ],
-            )
-          : Container(width: 0, height: 0),
+            );
+          } else {
+            return Container(width: 0, height: 0);
+          }
+        },
+      ),
       appBar: AppBar(title: Text('Detalles del Meetup')),
+      bottomNavigationBar: BottomNavigation(),
+      floatingActionButton: _MeetupActionButton(),
+    );
+  }
+}
+
+class _MeetupActionButton extends StatelessWidget {
+  final AuthApiService auth = AuthApiService();
+
+  Widget build(BuildContext context) {
+    return FutureBuilder<bool>(
+      future: auth.isAuthenticated(),
+      builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
+        if (snapshot.hasData && snapshot.data) {
+          // TODO: Check if user is meetup owner and check if user is already member
+          final isMember = false;
+          if (isMember) {
+            return FloatingActionButton(
+              onPressed: () {},
+              child: Icon(Icons.cancel),
+              backgroundColor: Colors.red,
+              tooltip: 'Salir del Meetup',
+            );
+          } else {
+            return FloatingActionButton(
+              onPressed: () {},
+              child: Icon(Icons.person_add),
+              backgroundColor: Colors.green,
+              tooltip: 'Unirse al Meetup',
+            );
+          }
+        } else {
+          return Container(width: 0, height: 0);
+        }
+      },
     );
   }
 }
@@ -106,7 +169,6 @@ class AdditionalInfoSection extends StatelessWidget {
   final Meetup meetup;
 
   AdditionalInfoSection(this.meetup);
-
 
   String _capitilize(String word) {
     return (word != null && word.isNotEmpty)

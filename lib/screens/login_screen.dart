@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:meetups_app/blocs/auth_bloc/auth_bloc.dart';
+import 'package:meetups_app/blocs/auth_bloc/events.dart';
+import 'package:meetups_app/blocs/bloc_provider.dart';
 import 'package:meetups_app/models/forms.dart';
 import 'package:meetups_app/screens/meetup_home_screen.dart';
 import 'package:meetups_app/screens/register_screen.dart';
 import 'package:meetups_app/services/auth_api_provider.dart';
 
-
 class LoginScreen extends StatefulWidget {
-    final String message;
+  final String message;
   static final String route = '/login';
   final AuthApiService authApi = AuthApiService();
-   LoginScreen({this.message});
+  LoginScreen({this.message});
   BuildContext _scaffoldContext;
 
   _LoginScreenState createState() => _LoginScreenState();
@@ -22,6 +24,8 @@ class _LoginScreenState extends State<LoginScreen> {
   final GlobalKey<FormFieldState<String>> _emailKey =
       GlobalKey<FormFieldState<String>>();
 
+  AuthBloc _authBloc;
+
   LoginFormData _loginData = LoginFormData();
   bool _autovalidate = false;
   BuildContext _scaffoldContext;
@@ -31,15 +35,15 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   initState() {
-    super.initState();
+    _authBloc = BlocProvider.of<AuthBloc>(context);
     WidgetsBinding.instance.addPostFrameCallback((_) => _checkForMessage());
+    super.initState();
   }
 
   void _checkForMessage() {
     if (widget.message != null && widget.message.isNotEmpty) {
-      Scaffold.of(_scaffoldContext).showSnackBar(SnackBar(
-        content: Text(widget.message)
-      ));
+      Scaffold.of(_scaffoldContext)
+          .showSnackBar(SnackBar(content: Text(widget.message)));
     }
     // _emailController.addListener(() {
     //   print(_emailController.text);
@@ -54,9 +58,13 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _login() {
-    widget.authApi.login(_loginData).then((data) {
-      Navigator.pushNamed(context, MeetupHomeScreen.route);
+    _authBloc.dispatch(InitLogging());
+    widget.authApi
+    .login(_loginData)
+    .then((data) {
+        _authBloc.dispatch(LoggedIn());
     }).catchError((res) {
+      _authBloc.dispatch(LoggedOut());
       Scaffold.of(_scaffoldContext)
           .showSnackBar(SnackBar(content: Text(res['errors']['message'])));
     });
@@ -128,59 +136,7 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         );
       }),
-      // body: Padding(
-      //   padding: EdgeInsets.all(hypotenuse(
-      //       MediaQuery.of(context).size.height * 0.035,
-      //       MediaQuery.of(context).size.width * 0.035)),
-      //   child: Form(
-      //     autovalidate: _autovalidate,
-      //     key: _formKey,
-      //     // Provide key
-      //     child: ListView(
-      //       children: [
-      //         Container(
-      //           margin: EdgeInsets.only(
-      //               bottom: MediaQuery.of(context).size.height * 0.02),
-      //           child: Text(
-      //             'Iniciar sesión',
-      //             style: TextStyle(
-      //                 fontSize: 30.0 * MediaQuery.of(context).textScaleFactor,
-      //                 fontWeight: FontWeight.bold),
-      //           ),
-      //         ),
-      //         TextFormField(
-      //           key: _emailKey,
-      //           onSaved: (value) => _loginData.email = value,
-      //           //controller: _emailController,
-      //           style: Theme.of(context).textTheme.headline,
-      //           decoration: InputDecoration(hintText: 'Correo Electrónico'),
-      //           validator: composeValidators('email',
-      //               [requiredValidator, minLengthValidator, emailValidator]),
-      //         ),
-      //         TextFormField(
-      //           key: _passwordKey,
-      //           onSaved: (value) => _loginData.password = value,
-      //           //controller: _passwordController,
-      //           style: Theme.of(context).textTheme.headline,
-      //           decoration: InputDecoration(hintText: 'Contraseña'),
-      //           validator: composeValidators(
-      //               'password', [requiredValidator, minLengthValidator]),
-      //         ),
-      //         _buildLinks(context),
-      //         Container(
-      //             alignment: Alignment(-1.0, 0.0),
-      //             margin: EdgeInsets.only(
-      //                 top: MediaQuery.of(context).size.height * 0.01),
-      //             child: RaisedButton(
-      //               textColor: Colors.white,
-      //               color: Theme.of(context).primaryColor,
-      //               child: const Text('Enviar'),
-      //               onPressed: _submit,
-      //             ))
-      //       ],
-      //     ),
-      //   ),
-      // ),
+
       appBar: AppBar(title: Text('Login')),
     );
   }

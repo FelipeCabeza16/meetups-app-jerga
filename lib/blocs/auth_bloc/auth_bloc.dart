@@ -1,0 +1,60 @@
+import 'dart:async';
+
+import 'package:flutter/widgets.dart';
+import 'package:meetups_app/blocs/auth_bloc/events.dart';
+import 'package:meetups_app/blocs/auth_bloc/states.dart';
+import 'package:meetups_app/blocs/bloc_provider.dart';
+import 'package:meetups_app/services/auth_api_provider.dart';
+import 'package:rxdart/rxdart.dart';
+
+class AuthBloc extends BlocBase {
+  final AuthApiService auth;
+
+  final BehaviorSubject<AuthenticationState> _authController =
+      BehaviorSubject<AuthenticationState>();
+
+  Stream<AuthenticationState> get authState => _authController.stream;
+  StreamSink<AuthenticationState> get _inAuth => _authController.sink;
+
+  AuthBloc({@required this.auth}) : assert(auth != null);
+
+  void dispatch(AuthenticationEvent event) async {
+    await for (var state in _authStream(event)) {
+      // provide state to other screen via controller
+      print('sending state $state');
+      _inAuth.add(state);
+    }
+  }
+
+  Stream<AuthenticationState> _authStream(AuthenticationEvent event) async* {
+    if (event is AppStarted) {
+      // Check if user is authenticated
+      final bool isAuth = await auth.isAuthenticated();
+      print(event);
+      print('isAuth: $isAuth');
+
+      if (isAuth) {
+        yield AuthenticationAuthenticated();
+      } else {
+        yield AuthenticationUnauthenticated();
+      }
+    }
+
+      if (event is InitLogging) {
+        yield AuthenticationLoading();
+      }
+
+      if (event is LoggedIn) {
+        yield AuthenticationAuthenticated();
+      }
+
+ if (event is LoggedOut) {
+      yield AuthenticationUnauthenticated(logout: true);
+
+  }
+
+}
+  dispose() {
+    _authController.close();
+  }
+}
