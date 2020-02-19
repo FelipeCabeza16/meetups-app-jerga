@@ -49,6 +49,7 @@ class AuthApiService {
 
     return false;
   }
+  // We need to rework this
 
   Future<bool> isAuthenticated() async {
     final token = await this.token;

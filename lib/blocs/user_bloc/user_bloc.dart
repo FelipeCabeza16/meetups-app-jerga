@@ -50,13 +50,6 @@ class UserBloc extends BlocBase {
       }
     }
 
-     if (event is JoinMeetup) {
-      yield UserIsMember();
-    }
-
-    if (event is LeaveMeetup) {
-      yield UserIsNotMember();
-    }
   }
 
   bool _isUserMeetupOwner(Meetup meetup, User user) {

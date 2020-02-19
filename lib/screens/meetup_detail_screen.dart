@@ -22,6 +22,7 @@ class MeetupDetailScreen extends StatefulWidget {
 class _MeetupDetailScreenState extends State<MeetupDetailScreen> {
   MeetupBloc _meetupBloc;
   UserBloc _userBloc;
+  Meetup _meetup;
 
   void initState() {
     _meetupBloc = BlocProvider.of<MeetupBloc>(context);
@@ -29,6 +30,7 @@ class _MeetupDetailScreenState extends State<MeetupDetailScreen> {
 
     _meetupBloc.fetchMeetup(widget.meetupId);
     _meetupBloc.meetup.listen((meetup) {
+      _meetup = meetup;
       _userBloc.dispatch(CheckUserPermissionsOnMeetup(meetup: meetup));
     });
 
@@ -36,11 +38,12 @@ class _MeetupDetailScreenState extends State<MeetupDetailScreen> {
   }
 
   _joinMeetup() {
-    _userBloc.dispatch(JoinMeetup());
+    _meetupBloc.joinMeetup(_meetup);
+
   }
 
   _leaveMeetup() {
-    _userBloc.dispatch(LeaveMeetup());
+    _meetupBloc.leaveMeetup(_meetup);
   }
 
   Widget build(BuildContext context) {
@@ -95,15 +98,15 @@ class _MeetupActionButton extends StatelessWidget {
   final AuthApiService auth = AuthApiService();
   final UserState userState;
 
- final Function() joinMeetup;
+  final Function() joinMeetup;
   final Function() leaveMeetup;
 
-  _MeetupActionButton({@required this.userState,
-                       @required this.joinMeetup,
-                       @required this.leaveMeetup});
+  _MeetupActionButton(
+      {@required this.userState,
+      @required this.joinMeetup,
+      @required this.leaveMeetup});
 
   Widget build(BuildContext context) {
-
     if (userState is UserIsMember) {
       return FloatingActionButton(
         onPressed: leaveMeetup,
