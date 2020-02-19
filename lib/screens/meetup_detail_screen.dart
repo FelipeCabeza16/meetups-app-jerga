@@ -35,11 +35,20 @@ class _MeetupDetailScreenState extends State<MeetupDetailScreen> {
     super.initState();
   }
 
+  _joinMeetup() {
+    _userBloc.dispatch(JoinMeetup());
+  }
+
+  _leaveMeetup() {
+    _userBloc.dispatch(LeaveMeetup());
+  }
+
   Widget build(BuildContext context) {
     return StreamBuilder<UserState>(
         stream: _userBloc.userState,
         initialData: UserInitialState(),
         builder: (BuildContext context, AsyncSnapshot<UserState> snapshot) {
+          final userState = snapshot.data;
           return Scaffold(
             body: StreamBuilder<Meetup>(
               stream: _meetupBloc.meetup,
@@ -73,7 +82,10 @@ class _MeetupDetailScreenState extends State<MeetupDetailScreen> {
             ),
             appBar: AppBar(title: Text('Meetup Detail')),
             bottomNavigationBar: BottomNavigation(),
-            floatingActionButton: _MeetupActionButton(),
+            floatingActionButton: _MeetupActionButton(
+                userState: userState,
+                joinMeetup: _joinMeetup,
+                leaveMeetup: _leaveMeetup),
           );
         });
   }
@@ -81,34 +93,34 @@ class _MeetupDetailScreenState extends State<MeetupDetailScreen> {
 
 class _MeetupActionButton extends StatelessWidget {
   final AuthApiService auth = AuthApiService();
+  final UserState userState;
+
+ final Function() joinMeetup;
+  final Function() leaveMeetup;
+
+  _MeetupActionButton({@required this.userState,
+                       @required this.joinMeetup,
+                       @required this.leaveMeetup});
 
   Widget build(BuildContext context) {
-    return FutureBuilder<bool>(
-      future: auth.isAuthenticated(),
-      builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
-        if (snapshot.hasData && snapshot.data) {
-          // TODO: Check if user is meetup owner and check if user is already member
-          final isMember = false;
-          if (isMember) {
-            return FloatingActionButton(
-              onPressed: () {},
-              child: Icon(Icons.cancel),
-              backgroundColor: Colors.red,
-              tooltip: 'Salir del Meetup',
-            );
-          } else {
-            return FloatingActionButton(
-              onPressed: () {},
-              child: Icon(Icons.person_add),
-              backgroundColor: Colors.green,
-              tooltip: 'Unirse al Meetup',
-            );
-          }
-        } else {
-          return Container(width: 0, height: 0);
-        }
-      },
-    );
+
+    if (userState is UserIsMember) {
+      return FloatingActionButton(
+        onPressed: leaveMeetup,
+        child: Icon(Icons.cancel),
+        backgroundColor: Colors.red,
+        tooltip: 'Salir del Meetup',
+      );
+    } else if (userState is UserIsNotMember) {
+      return FloatingActionButton(
+        onPressed: joinMeetup,
+        child: Icon(Icons.person_add),
+        backgroundColor: Colors.green,
+        tooltip: 'Unirse al Meetup',
+      );
+    } else {
+      return Container(width: 0, height: 0);
+    }
   }
 }
 

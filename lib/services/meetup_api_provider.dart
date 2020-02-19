@@ -2,6 +2,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:io' show Platform;
 import 'package:meetups_app/models/meetups.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 
 class MeetupApiService {
@@ -24,4 +25,31 @@ class MeetupApiService {
     final parsedMeetup = json.decode(res.body);
     return Meetup.fromJSON(parsedMeetup);
   }
+
+ Future<bool> joinMeetup(String meetupId) async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token');
+
+      await http.post('$url/meetups/$meetupId/join',
+                      headers: {'Authorization': 'Bearer $token'});
+      return true;
+    } catch(e) {
+      throw Exception('Fallo el intento de salir del meetup!');
+    }
+  }
+
+  Future<bool> leaveMeetup(String meetupId) async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token');
+
+      await http.post('$url/meetups/$meetupId/leave',
+                      headers: {'Authorization': 'Bearer $token'});
+      return true;
+    } catch(e) {
+      throw Exception('Fallo el intento de salir del meetup!');
+    }
+  }
+
 }
