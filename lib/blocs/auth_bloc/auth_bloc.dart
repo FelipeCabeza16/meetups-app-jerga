@@ -6,10 +6,8 @@ import 'package:meetups_app/blocs/bloc_provider.dart';
 import 'package:meetups_app/services/auth_api_provider.dart';
 import 'package:rxdart/rxdart.dart';
 
-
 export 'package:meetups_app/blocs/auth_bloc/events.dart';
 export 'package:meetups_app/blocs/auth_bloc/states.dart';
-
 
 class AuthBloc extends BlocBase {
   final AuthApiService auth;
@@ -38,26 +36,30 @@ class AuthBloc extends BlocBase {
       print('isAuth: $isAuth');
 
       if (isAuth) {
+        await auth.fetchAuthUser().catchError((error) {
+          dispatch(LoggedOut());
+        });
+
         yield AuthenticationAuthenticated();
       } else {
         yield AuthenticationUnauthenticated();
       }
     }
 
-      if (event is InitLogging) {
-        yield AuthenticationLoading();
-      }
+    if (event is InitLogging) {
+      yield AuthenticationLoading();
+    }
 
-      if (event is LoggedIn) {
-        yield AuthenticationAuthenticated();
-      }
+    if (event is LoggedIn) {
+      yield AuthenticationAuthenticated();
+    }
 
- if (event is LoggedOut) {
-      yield AuthenticationUnauthenticated(logout: true);
-
+    if (event is LoggedOut) {
+      print('deberia entrar aquí');
+      yield AuthenticationUnauthenticated(message: event.message);
+    }
   }
 
-}
   dispose() {
     _authController.close();
   }

@@ -71,8 +71,13 @@ class _MeetupTitle extends StatelessWidget {
                   Spacer(),
                   GestureDetector(
                     onTap: () {
-                      auth.logout()
-                      .then((isLogout) => authBloc.dispatch(LoggedOut())); 
+                      auth.logout().then((isLogout) {
+                          print('Se està cerrando la sesión');                       
+                          authBloc.dispatch(
+                          LoggedOut(
+                              message: 'Se cerró la sesión!'));
+
+                      });
                     },
                     child: Text('Salir',
                         style:

@@ -59,14 +59,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void _login() {
     _authBloc.dispatch(InitLogging());
-    widget.authApi
-    .login(_loginData)
-    .then((data) {
-        _authBloc.dispatch(LoggedIn());
+    widget.authApi.login(_loginData).then((data) {
+      _authBloc.dispatch(LoggedIn());
     }).catchError((res) {
-      _authBloc.dispatch(LoggedOut());
-      Scaffold.of(_scaffoldContext)
-          .showSnackBar(SnackBar(content: Text(res['errors']['message'])));
+      _authBloc.dispatch(LoggedOut(message: res['errors']['message']));
     });
   }
 
@@ -136,7 +132,6 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         );
       }),
-
       appBar: AppBar(title: Text('Login')),
     );
   }

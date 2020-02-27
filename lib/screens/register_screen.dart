@@ -25,8 +25,7 @@ class RegisterScreenState extends State<RegisterScreen> {
   void _handleSuccess(data) {
     Navigator.pushNamedAndRemoveUntil(
         context, '/', (Route<dynamic> route) => false,
-        arguments: LoginScreenArguments(
-            'Registrado éxitosamente (:'));
+        arguments: LoginScreenArguments('Registrado éxitosamente (:'));
   }
 
   void _handleError(res) {
@@ -151,7 +150,7 @@ class RegisterScreenState extends State<RegisterScreen> {
           textColor: Colors.white,
           color: Theme.of(context).primaryColor,
           child: const Text('Enviar'),
-          onPressed: _submit, 
+          onPressed: _submit,
         ));
   }
 
@@ -164,7 +163,8 @@ class RegisterScreenState extends State<RegisterScreen> {
         children: <Widget>[
           GestureDetector(
             onTap: () {
-              Navigator.pushNamed(context, "/");
+              Navigator.pushNamedAndRemoveUntil(
+                  context, "/", (Route<dynamic> route) => false);
             },
             child: Text(
               'Ya te uníste? Ingresa ahora.',

@@ -55,7 +55,8 @@ class _MeetuperAppState extends State<MeetuperApp> {
           builder: (BuildContext context,
               AsyncSnapshot<AuthenticationState> snapshot) {
             final state = snapshot.data;
-
+            print('current state');
+            print(state);
             if (state is AuthenticationUninitialized) {
               return SplashScreen();
             }
@@ -66,10 +67,17 @@ class _MeetuperAppState extends State<MeetuperApp> {
             }
 
             if (state is AuthenticationUnauthenticated) {
-              final LoginScreenArguments arguments = !state.logout
-                  ? ModalRoute.of(context).settings.arguments
-                  : null;
-              return LoginScreen(message: arguments?.message);
+              print('entra aqui');
+              print('entra aqui');
+              print('entra aqui');
+              print('entra aqui');
+
+
+              final LoginScreenArguments arguments =
+                  ModalRoute.of(context).settings.arguments;
+              final message = state.message ?? arguments?.message;
+              state.message = null;
+              return LoginScreen(message: message);
             }
 
             if (state is AuthenticationLoading) {
@@ -91,11 +99,8 @@ class _MeetuperAppState extends State<MeetuperApp> {
                 builder: (context) => BlocProvider<MeetupBloc>(
                     bloc: MeetupBloc(),
                     child: BlocProvider<UserBloc>(
-                      bloc: UserBloc(auth: AuthApiService()),
-                      child: MeetupDetailScreen(meetupId: arguments.id)
-                    )
-                  )
-                );
+                        bloc: UserBloc(auth: AuthApiService()),
+                        child: MeetupDetailScreen(meetupId: arguments.id))));
           }
           if (settings.name == LoginScreen.route) {
             final LoginScreenArguments arguments = settings.arguments;
