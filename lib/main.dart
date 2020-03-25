@@ -41,14 +41,9 @@ class _MeetuperAppState extends State<MeetuperApp> {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
     return MaterialApp(
         debugShowCheckedModeBanner: false,
         theme: ThemeData(primarySwatch: Colors.blue),
-        //  home: BlocProvider<CounterBloc>(
-        //     bloc: CounterBloc(),
-        //     child: CounterHomeScreen(title: appTitle)
-        //   ) ,
         home: StreamBuilder<AuthenticationState>(
           stream: authBloc.authState,
           initialData: AuthenticationUninitialized(),
@@ -63,16 +58,12 @@ class _MeetuperAppState extends State<MeetuperApp> {
 
             if (state is AuthenticationAuthenticated) {
               return BlocProvider<MeetupBloc>(
-                  bloc: MeetupBloc(), child: MeetupHomeScreen());
+                bloc: MeetupBloc(),
+                child: MeetupHomeScreen(),
+              );
             }
 
             if (state is AuthenticationUnauthenticated) {
-              print('entra aqui');
-              print('entra aqui');
-              print('entra aqui');
-              print('entra aqui');
-
-
               final LoginScreenArguments arguments =
                   ModalRoute.of(context).settings.arguments;
               final message = state.message ?? arguments?.message;
@@ -86,7 +77,8 @@ class _MeetuperAppState extends State<MeetuperApp> {
           },
         ),
         routes: {
-          MeetupHomeScreen.route: (context) => BlocProvider<MeetupBloc>(
+          MeetupHomeScreen.route: (context) 
+          => BlocProvider<MeetupBloc>(
                 bloc: MeetupBloc(),
                 child: MeetupHomeScreen(),
               ),
@@ -95,13 +87,16 @@ class _MeetuperAppState extends State<MeetuperApp> {
         onGenerateRoute: (RouteSettings settings) {
           if (settings.name == MeetupDetailScreen.route) {
             final MeetupDetailArguments arguments = settings.arguments;
+
             return MaterialPageRoute(
-                builder: (context) => BlocProvider<MeetupBloc>(
+                builder: (context) 
+                => BlocProvider<MeetupBloc>(
                     bloc: MeetupBloc(),
                     child: BlocProvider<UserBloc>(
                         bloc: UserBloc(auth: AuthApiService()),
                         child: MeetupDetailScreen(meetupId: arguments.id))));
           }
+          
           if (settings.name == LoginScreen.route) {
             final LoginScreenArguments arguments = settings.arguments;
 

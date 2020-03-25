@@ -37,6 +37,7 @@ class UserBloc extends BlocBase {
 
         if (_isUserMeetupOwner(meetup, user)) {
           yield UserIsMeetupOwner();
+          // IF IT'S OWNER, MUST BE NOT MEMBER, FINISH FUNCTION 
           return;
         }
 
@@ -53,7 +54,6 @@ class UserBloc extends BlocBase {
   }
 
   bool _isUserMeetupOwner(Meetup meetup, User user) {
-    // Fix it in next lecture
     return user != null && meetup.meetupCreator.id == user.id;
   }
 

@@ -56,6 +56,7 @@ class _MeetupTitle extends StatelessWidget {
       future: auth.isAuthenticated(),
       builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
         if (snapshot.hasData && snapshot.data) {
+          print(authBloc.runtimeType);
           final user = auth.authUser;
           return Container(
               margin: EdgeInsets.only(
@@ -71,13 +72,9 @@ class _MeetupTitle extends StatelessWidget {
                   Spacer(),
                   GestureDetector(
                     onTap: () {
-                      auth.logout().then((isLogout) {
-                          print('Se està cerrando la sesión');                       
-                          authBloc.dispatch(
-                          LoggedOut(
-                              message: 'Se cerró la sesión!'));
-
-                      });
+                      auth.logout()
+                      .then((isLogout) =>                          
+                          authBloc.dispatch(LoggedOut(message: 'Se cerró la sesión!')));
                     },
                     child: Text('Salir',
                         style:

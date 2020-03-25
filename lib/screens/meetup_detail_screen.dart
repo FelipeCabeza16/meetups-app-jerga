@@ -39,7 +39,6 @@ class _MeetupDetailScreenState extends State<MeetupDetailScreen> {
 
   _joinMeetup() {
     _meetupBloc.joinMeetup(_meetup);
-
   }
 
   _leaveMeetup() {

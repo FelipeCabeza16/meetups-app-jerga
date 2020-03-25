@@ -22,7 +22,6 @@ class AuthBloc extends BlocBase {
 
   void dispatch(AuthenticationEvent event) async {
     await for (var state in _authStream(event)) {
-      // provide state to other screen via controller
       print('sending state $state');
       _inAuth.add(state);
     }
@@ -30,16 +29,13 @@ class AuthBloc extends BlocBase {
 
   Stream<AuthenticationState> _authStream(AuthenticationEvent event) async* {
     if (event is AppStarted) {
-      // Check if user is authenticated
       final bool isAuth = await auth.isAuthenticated();
-      print(event);
-      print('isAuth: $isAuth');
 
       if (isAuth) {
-        await auth.fetchAuthUser().catchError((error) {
-          dispatch(LoggedOut());
-        });
-
+        auth.initUserFromToken();
+        // await auth.fetchAuthUser().catchError((error) {
+        //   dispatch(LoggedOut());
+        // });
         yield AuthenticationAuthenticated();
       } else {
         yield AuthenticationUnauthenticated();
@@ -61,6 +57,7 @@ class AuthBloc extends BlocBase {
   }
 
   dispose() {
+    print('disposing...');
     _authController.close();
   }
 }
