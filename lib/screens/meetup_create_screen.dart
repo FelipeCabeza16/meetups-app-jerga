@@ -3,8 +3,12 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:meetups_app/models/category.dart';
 import 'package:meetups_app/models/forms.dart';
+import 'package:meetups_app/screens/meetup_detail_screen.dart';
+import 'package:meetups_app/screens/meetup_home_screen.dart';
 import 'package:meetups_app/services/meetup_api_provider.dart';
+import 'package:meetups_app/utils/generate_times.dart';
 import 'package:meetups_app/utils/hypotenuse.dart';
+import 'package:meetups_app/widgets/select_input.dart';
 
 class MeetupCreateScreen extends StatefulWidget {
   static final String route = '/meetupCreate';
@@ -19,6 +23,7 @@ class MeetupCreateScreenState extends State<MeetupCreateScreen> {
   MeetupFormData _meetupFormData = MeetupFormData();
   MeetupApiService _api = MeetupApiService();
   List<Category> _categories = [];
+  final List<String> _times = generateTimes();
 
   @override
   initState() {
@@ -33,12 +38,19 @@ class MeetupCreateScreenState extends State<MeetupCreateScreen> {
     _meetupFormData.startDate = selectedDate;
   }
 
-  _handleTimeFromChange(String time) {
-    _meetupFormData.timeFrom = time;
-  }
-
-  _handleTimeToChange(String time) {
-    _meetupFormData.timeTo = time;
+  void _submitCreate() {
+    final form = _formKey.currentState;
+    if (form.validate()) {
+      form.save();
+      _api.createMeetup(_meetupFormData).then((String meetupId) {
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          MeetupDetailScreen.route,
+          ModalRoute.withName('/'),
+          arguments: MeetupDetailArguments(id: meetupId),
+        );
+      }).catchError((e) => print(e));
+    }
   }
 
   @override
@@ -53,26 +65,6 @@ class MeetupCreateScreenState extends State<MeetupCreateScreen> {
                   MediaQuery.of(context).size.width * 0.04)),
               child: _buildForm());
         }));
-  }
-
-  void handleSuccesfulCreate(dynamic data) async {
-    // await Navigator
-    //   .pushNamed(context, "/login",
-    //              arguments: LoginScreenArguments('You have been succesfuly logged in!'));
-  }
-
-  void handleError(String message) {
-    Scaffold.of(_scaffoldContext)
-        .showSnackBar(SnackBar(content: Text(message)));
-  }
-
-  void _submitCreate() {
-    final form = _formKey.currentState;
-    if (form.validate()) {
-      form.save();
-      print(_meetupFormData.toJSON());
-      print(_meetupFormData.startDate);
-    }
   }
 
   Widget _buildForm() {
@@ -98,11 +90,12 @@ class MeetupCreateScreenState extends State<MeetupCreateScreen> {
             onSaved: (value) => _meetupFormData.title = value,
           ),
           _DatePicker(onDateChange: _handleDateChange),
-          _CategorySelect(
-              categories: _categories, meetupFormData: _meetupFormData),
+          SelectInput<Category>(
+              items: _categories,
+              onChange: (Category c) => _meetupFormData.category = c,
+              label: 'Categoría'),
           TextFormField(
             style: Theme.of(context).textTheme.headline,
-            inputFormatters: [LengthLimitingTextInputFormatter(30)],
             decoration: InputDecoration(
               hintText: 'Imagen',
             ),
@@ -122,10 +115,18 @@ class MeetupCreateScreenState extends State<MeetupCreateScreen> {
             decoration: InputDecoration(
               hintText: 'Descripción',
             ),
+            maxLines: null,
+            keyboardType: TextInputType.multiline,
             onSaved: (value) => _meetupFormData.description = value,
           ),
-          _TimeSelect(onTimeChange: _handleTimeFromChange, label: 'Desde'),
-          _TimeSelect(onTimeChange: _handleTimeToChange, label: 'Hasta'),
+          SelectInput<String>(
+              items: _times,
+              onChange: (String t) => _meetupFormData.timeFrom = t,
+              label: 'Desde'),
+          SelectInput<String>(
+              items: _times,
+              onChange: (String t) => _meetupFormData.timeTo = t,
+              label: 'Hasta'),
           _buildSubmitBtn()
         ],
       ),
@@ -159,43 +160,6 @@ class MeetupCreateScreenState extends State<MeetupCreateScreen> {
   }
 }
 
-class _CategorySelect extends StatelessWidget {
-  final List<Category> categories;
-  final MeetupFormData meetupFormData;
-
-  _CategorySelect({@required this.categories, @required this.meetupFormData});
-
-  Widget build(BuildContext context) {
-    return FormField<Category>(
-      builder: (FormFieldState<Category> state) {
-        return InputDecorator(
-          decoration: InputDecoration(
-            labelText: 'Categoría',
-            icon: const Icon(Icons.color_lens),
-          ),
-          isEmpty: meetupFormData.category == null,
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<Category>(
-              value: meetupFormData.category,
-              isDense: true,
-              onChanged: (Category newCategory) {
-                meetupFormData.category = newCategory;
-                state.didChange(newCategory);
-              },
-              items: categories.map((Category category) {
-                return DropdownMenuItem<Category>(
-                  value: category,
-                  child: Text(category.name),
-                );
-              }).toList(),
-            ),
-          ),
-        );
-      },
-    );
-  }
-}
-
 class _DatePicker extends StatefulWidget {
   final Function(DateTime date) onDateChange;
 
@@ -217,11 +181,13 @@ class _DatePickerState extends State<_DatePicker> {
         initialDate: _initialDate,
         firstDate: _dateNow,
         lastDate: DateTime(_dateNow.year + 1, _dateNow.month, _dateNow.day));
-    if (picked != null && picked != _initialDate) widget.onDateChange(picked);
-    setState(() {
-      _dateController.text = _dateFormat.format(picked);
-      _initialDate = picked;
-    });
+    if (picked != null && picked != _initialDate) {
+      widget.onDateChange(picked);
+      setState(() {
+        _dateController.text = _dateFormat.format(picked);
+        _initialDate = picked;
+      });
+    }
   }
 
   Widget build(BuildContext context) {
@@ -245,57 +211,5 @@ class _DatePickerState extends State<_DatePicker> {
         }),
       )
     ]);
-  }
-}
-
-class _TimeSelect extends StatefulWidget {
-  final Function(String) onTimeChange;
-  final label;
-  _TimeSelectState createState() => _TimeSelectState();
-
-  _TimeSelect({@required this.onTimeChange, this.label});
-}
-
-class _TimeSelectState extends State<_TimeSelect> {
-  final List<String> _times = [
-    '00:00',
-    '00:30',
-    '01:00',
-    '01:30',
-    '02:00',
-    '02:30',
-    '03:00'
-  ];
-  String _selectedTime;
-
-  Widget build(BuildContext context) {
-    return FormField<String>(
-      builder: (FormFieldState<String> state) {
-        return InputDecorator(
-          decoration: InputDecoration(
-            icon: const Icon(Icons.timer),
-            labelText: widget.label ?? 'Hora',
-          ),
-          isEmpty: _selectedTime == null,
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<String>(
-              value: _selectedTime,
-              isDense: true,
-              onChanged: (String newTime) {
-                widget.onTimeChange(newTime);
-                _selectedTime = newTime;
-                state.didChange(newTime);
-              },
-              items: _times.map((String time) {
-                return DropdownMenuItem<String>(
-                  value: time,
-                  child: Text(time),
-                );
-              }).toList(),
-            ),
-          ),
-        );
-      },
-    );
   }
 }
