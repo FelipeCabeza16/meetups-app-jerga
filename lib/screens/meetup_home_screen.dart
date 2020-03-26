@@ -4,6 +4,7 @@ import 'package:meetups_app/blocs/auth_bloc/events.dart';
 import 'package:meetups_app/blocs/bloc_provider.dart';
 import 'package:meetups_app/blocs/meetups_bloc.dart';
 import 'package:meetups_app/models/meetups.dart';
+import 'package:meetups_app/screens/meetup_create_screen.dart';
 import 'package:meetups_app/screens/meetup_detail_screen.dart';
 import 'package:meetups_app/services/auth_api_provider.dart';
 
@@ -39,8 +40,12 @@ class MeetupHomeScreenState extends State<MeetupHomeScreen> {
         ],
       ),
       appBar: AppBar(title: Text('Inicio')),
-      floatingActionButton:
-          FloatingActionButton(child: Icon(Icons.add), onPressed: () {}),
+      floatingActionButton: FloatingActionButton(
+        child: Icon(Icons.add),
+        onPressed: () {
+          Navigator.pushNamed(context, MeetupCreateScreen.route);
+        },
+      ),
     );
   }
 }
@@ -72,9 +77,8 @@ class _MeetupTitle extends StatelessWidget {
                   Spacer(),
                   GestureDetector(
                     onTap: () {
-                      auth.logout()
-                      .then((isLogout) =>                          
-                          authBloc.dispatch(LoggedOut(message: 'Se cerró la sesión!')));
+                      auth.logout().then((isLogout) => authBloc
+                          .dispatch(LoggedOut(message: 'Se cerró la sesión!')));
                     },
                     child: Text('Salir',
                         style:

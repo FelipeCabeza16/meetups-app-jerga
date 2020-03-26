@@ -1,4 +1,5 @@
 import 'package:http/http.dart' as http;
+import 'package:meetups_app/models/category.dart';
 import 'dart:convert';
 import 'dart:io' show Platform;
 import 'package:meetups_app/models/meetups.dart';
@@ -24,6 +25,12 @@ class MeetupApiService {
     final res = await http.get('$url/meetups/$id');
     final parsedMeetup = json.decode(res.body);
     return Meetup.fromJSON(parsedMeetup);
+  }
+
+ Future<List<Category>> fetchCategories() async {
+    final res = await http.get('$url/categories');
+    final List decodedBody = json.decode(res.body);
+    return decodedBody.map((val) => Category.fromJSON(val)).toList();
   }
 
  Future<bool> joinMeetup(String meetupId) async {
