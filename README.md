@@ -1,16 +1,7 @@
 # meetups_app
 
-A new Flutter project.
+Esta aplicación fue realizada para el aprendizaje de las tecnologías Flutter, Dart, Node.js, MongoDB.
 
-## Getting Started
+La aplicación consistía en un registro y login donde los usuarios podían crear y unirse a reuniones de ciertas categorías.
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
-
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+La aplicación consumía un servidor en Node.js, usaba MongoDB se desplegaba en MongoDB Atlas y respectivamente en Heroku.
